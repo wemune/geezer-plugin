@@ -1,0 +1,138 @@
+# Geezer Plugin Configuration
+
+# Automatic Server Restart
+# --------------------------
+# If enabled, the server will automatically restart at the specified time each day.
+# This requires your server to be running in a wrapper script (like a .bat, .sh, or Docker with auto-restart)
+# that automatically starts the server again after it shuts down.
+auto-restart:
+  # Set to true to enable, false to disable.
+  enabled: true
+
+  # The time of day to restart the server, in 24-hour HH:mm format.
+  restart-time: "04:00"
+
+  # The time zone for the restart time.
+  # A list of valid time zones can be found here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  # Example: "America/New_York", "Europe/London", "UTC"
+  time-zone: "UTC"
+
+  # Warning times in minutes before the restart.
+  # The plugin will broadcast a message at each of these intervals.
+  # You can add or remove times from this list.
+  warning-minutes:
+    - 60
+    - 30
+    - 15
+    - 5
+    - 1
+
+# Automatic Backups
+# --------------------------
+# Creates a .zip backup of your server files on a schedule.
+auto-backup:
+  enabled: true
+  
+  # The time of day to run the backup, in 24-hour HH:mm format.
+  backup-time: "03:30"
+  
+  # The time zone for the backup time.
+  time-zone: "Europe/Stockholm"
+  
+  # The folder where backups will be stored (relative to the server root).
+  backup-folder: "backups"
+  
+  # How many of the most recent backups to keep. Older ones will be deleted.
+  keep-last: 7
+  
+  # A list of folders and files to include in the backup.
+  files-to-backup:
+    - "world"
+    - "world_nether"
+    - "world_the_end"
+    - "plugins/Geezer/database.db"
+
+
+# Player List Header & Footer
+# ---------------------------
+# Customize the text displayed at the top (header) and bottom (footer) of the player list (Tab key).
+# You can use color codes with '&'.
+#
+# Placeholders:
+# %online% - Current number of online players.
+# %max_players% - Maximum player slots on the server.
+# %uptime% - The server's current uptime.
+# %ping% - The player's latency to the server.
+player-list:
+  header: "&b&lGeezer World\n&7Welcome, &f%player_name%&7!"
+  footer: "\n&7Players Online: &f%online%/%max_players%\n&7Uptime: &f%uptime% &8| &7Ping: &f%ping%ms"
+
+# Message of the Day (MOTD)
+# -------------------------
+# This message is sent to a player in chat when they join the server.
+# You can use color codes with '&'.
+#
+# Placeholders:
+# %player_name% - The player's name.
+# %last_seen% - How long ago the player was last online.
+# %playtime% - The player's total playtime.
+motd:
+  enabled: true
+  lines:
+    - "&b&lWelcome back to Geezer World, &f%player_name%&b&l!"
+    - ""
+    - "&7Last Seen: &f%last_seen%"
+    - "&7Total Playtime: &f%playtime%"
+    - ""
+    - "&7Type &b/help &7to see all available commands."
+
+# First Join MOTD
+# -------------------------
+# This message is sent to a player ONLY the first time they join the server.
+#
+# Placeholders:
+# %player_name% - The player's name.
+first-join-motd:
+  enabled: true
+  lines:
+    - "&b&lWelcome to Geezer World, &f%player_name%&b&l!"
+    - ""
+    - "&7We're happy to have you here!"
+    - ""
+    - "&7Type &b/help &7to see all available commands."
+
+# Join and Quit Messages
+# ----------------------
+# Customize the messages broadcast when a player joins or leaves the server.
+# You can use color codes with '&'.
+#
+# Placeholders:
+# %player_name% - The player's name.
+join-and-quit-messages:
+  # Set to true to enable custom messages, false to use default Minecraft messages.
+  enabled: true
+  join: "&f%player_name% &7has &ajoined&7."
+  quit: "&f%player_name% &7has &cleft&7."
+
+# Death Messages
+# --------------
+# Customize the messages broadcast when a player dies.
+# You can use color codes with '&'.
+#
+# Placeholders:
+# %death_message% - The original, full death message (e.g., "Player was slain by Zombie").
+death-messages:
+  enabled: true
+  format: "&c%death_message%"
+
+# Rare Ore Announcements
+# ----------------------
+# Announce in chat when a player finds a rare ore.
+rare-ore-announcements:
+  enabled: true
+  # Message when a player finds diamonds.
+  # Placeholders: %player_name%, %count%
+  diamond-message: "&f%player_name% &7has found &b%count% Diamonds&7!"
+  # Message when a player finds ancient debris.
+  # Placeholders: %player_name%, %count%
+  ancient-debris-message: "&f%player_name% &7has found &c%count% Ancient Debris&7!"

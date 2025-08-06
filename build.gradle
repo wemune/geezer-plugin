@@ -1,0 +1,68 @@
+import org.gradle.jvm.toolchain.JvmVendorSpec
+
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'com.wem'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+}
+
+dependencies {
+    // Paper API for plugin development
+    compileOnly 'io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT'
+
+    // ORMlite for database object mapping
+    implementation 'com.j256.ormlite:ormlite-core:6.1'
+    implementation 'com.j256.ormlite:ormlite-jdbc:6.1'
+
+    // HikariCP for high-performance database connection pooling
+    implementation 'com.zaxxer:HikariCP:5.1.0'
+
+    // The database driver for SQLite
+    implementation 'org.xerial:sqlite-jdbc:3.45.1.0'
+    
+    // SLF4J API - HikariCP and ORMLite use this for logging. Paper provides the implementation.
+    compileOnly 'org.slf4j:slf4j-api:2.0.12'
+}
+
+java {
+    // Target Java 17, the standard for modern Minecraft.
+    // This setup allows Gradle to automatically download a compatible JDK (from Adoptium)
+    // if one is not already installed on your system.
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+        vendor = JvmVendorSpec.ADOPTIUM
+    }
+}
+
+shadowJar {
+    archiveFileName = 'Geezer.jar'
+
+    // Relocate dependencies to avoid conflicts with other plugins
+    // This is critical for a stable plugin
+    relocate 'com.j256.ormlite', 'com.wem.geezer.libs.ormlite'
+    relocate 'com.zaxxer.hikari', 'com.wem.geezer.libs.hikaricp'
+    relocate 'org.xerial.sqlite', 'com.wem.geezer.libs.sqlite'
+    
+    // Do not include the Paper API in the final jar
+    dependencies {
+        exclude(dependency('io.papermc.paper:paper-api'))
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+// Process plugin.yml to replace placeholders
+processResources {
+    filesMatching('plugin.yml') {
+        expand(project.properties)
+    }
+}

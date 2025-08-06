@@ -1,0 +1,22 @@
+# Gradle
+.gradle/
+build/
+bin/
+
+# IDE
+.vscode/
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Files
+*.jar
+*.log
+*.class
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini

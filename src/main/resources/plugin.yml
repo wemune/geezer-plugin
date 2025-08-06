@@ -1,0 +1,45 @@
+name: Geezer
+version: '1.0.0'
+main: com.wem.geezer.Geezer
+author: wem
+description: A custom plugin for the Geezer server.
+api-version: '1.20'
+commands:
+  playtime:
+    description: "Check your total playtime on the server."
+    usage: "/playtime [player]"
+    aliases: [pt]
+  stats:
+    description: "Check your gameplay statistics."
+    usage: "/stats [player]"
+  uptime:
+    description: "Shows the server's uptime."
+    usage: "/uptime"
+  ping:
+    description: "Check your or another player's ping."
+    usage: "/ping [player]"
+  seen:
+    description: "Check when a player was last online."
+    usage: "/seen <player>"
+  coords:
+    description: "Broadcast your coordinates or send them to a specific player."
+    usage: "/coords [player]"
+  msg:
+    description: "Send a private message to a player."
+    usage: "/msg <player> <message>"
+  reply:
+    description: "Reply to the last person who messaged you."
+    usage: "/r <message>"
+    aliases: [r]
+  time:
+    description: "Shows the current in-game time and time until the next sunrise/sunset."
+    usage: "/time"
+  help:
+    description: "Displays a list of all Geezer plugin commands."
+    usage: "/help"
+    override: true
+  backup:
+    description: "Manually starts a server backup."
+    usage: "/backup"
+    permission: geezer.backup
+    permission-message: "You do not have permission to use this command."
