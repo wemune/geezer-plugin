@@ -20,6 +20,8 @@ public class RestartManager {
 
     private final Geezer plugin;
     private final List<BukkitTask> scheduledTasks = new ArrayList<>();
+    private boolean isRestartScheduled = false;
+    private ZonedDateTime nextRestartTime = null;
 
     public RestartManager(Geezer plugin) {
         this.plugin = plugin;
@@ -31,19 +33,12 @@ public class RestartManager {
         FileConfiguration config = plugin.getConfig();
         if (!config.getBoolean("auto-restart.enabled", true)) {
             Logger.info("Auto-restart is disabled in the config.");
+            isRestartScheduled = false;
             return;
         }
 
         String restartTimeString = config.getString("auto-restart.restart-time", "04:00");
-        String timeZoneString = config.getString("auto-restart.time-zone", "UTC");
-        
-        ZoneId zoneId;
-        try {
-            zoneId = ZoneId.of(timeZoneString);
-        } catch (Exception e) {
-            Logger.severe("Invalid time-zone '" + timeZoneString + "' in config.yml. Please use a valid TZ database name. Disabling auto-restart.");
-            return;
-        }
+        ZoneId zoneId = plugin.getZoneId();
 
         LocalTime restartTime;
         try {
@@ -54,12 +49,12 @@ public class RestartManager {
         }
 
         ZonedDateTime now = ZonedDateTime.now(zoneId);
-        ZonedDateTime nextRestartTime = now.with(restartTime);
+        this.nextRestartTime = now.with(restartTime);
         if (now.isAfter(nextRestartTime) || now.isEqual(nextRestartTime)) {
-            nextRestartTime = nextRestartTime.plusDays(1);
+            this.nextRestartTime = nextRestartTime.plusDays(1);
         }
 
-        long totalSecondsUntilRestart = Duration.between(now, nextRestartTime).getSeconds();
+        long totalSecondsUntilRestart = Duration.between(now, this.nextRestartTime).getSeconds();
         Logger.info("Next server restart is scheduled for " + restartTime + " " + zoneId + " (in " + formatDuration(totalSecondsUntilRestart) + ").");
 
         BukkitTask mainTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
@@ -82,6 +77,7 @@ public class RestartManager {
                 scheduledTasks.add(warningTask);
             }
         }
+        isRestartScheduled = true;
     }
 
     private void broadcastRestartWarning(int minutes) {
@@ -109,14 +105,28 @@ public class RestartManager {
         scheduledTasks.add(mainTask);
     }
 
-    public void cancelRestart() {
+    public boolean cancelRestart() {
         if (!scheduledTasks.isEmpty()) {
             for (BukkitTask task : scheduledTasks) {
                 task.cancel();
             }
             scheduledTasks.clear();
             Logger.info("Scheduled server restart and all warnings have been cancelled.");
+            isRestartScheduled = false;
+            nextRestartTime = null;
+            return true;
         }
+        isRestartScheduled = false;
+        nextRestartTime = null;
+        return false;
+    }
+
+    public boolean isRestartScheduled() {
+        return isRestartScheduled;
+    }
+
+    public ZonedDateTime getNextRestartTime() {
+        return nextRestartTime;
     }
 
     private String formatDuration(long totalSeconds) {

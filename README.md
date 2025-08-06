@@ -1,6 +1,6 @@
 # Geezer Plugin
 
-A private Minecraft server plugin with a variety of features for players and administrators.
+A private Minecraft server plugin with a variety of features for Geezer World.
 
 ## Features
 
@@ -29,5 +29,5 @@ A private Minecraft server plugin with a variety of features for players and adm
 - **Command Logger**: Logs command usage by players for administrative review.
 - **Player Activity**: Logs player joins, quits, and deaths.
 
-### Loot Logging (In Development)
+### Loot Logging
 - Shift-right-click containers (Chests, Barrels, Shulker Boxes, etc.) to open a UI that displays a detailed history of all items taken or added, including who made the change and when.

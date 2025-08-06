@@ -43,3 +43,8 @@ commands:
     usage: "/backup"
     permission: geezer.backup
     permission-message: "You do not have permission to use this command."
+  togglerestart:
+    description: "Toggles the scheduled auto-restart."
+    usage: "/togglerestart"
+    permission: geezer.togglerestart
+    permission-message: "You do not have permission to use this command."

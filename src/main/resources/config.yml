@@ -1,5 +1,13 @@
 # Geezer Plugin Configuration
 
+# General Timezone
+# --------------------------
+# This timezone will be used for all time-sensitive features like auto-restarts,
+# backups, and timestamps in logs.
+# A list of valid time zones can be found here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+# Example: "America/New_York", "Europe/London", "UTC"
+timezone: "Europe/Stockholm"
+
 # Automatic Server Restart
 # --------------------------
 # If enabled, the server will automatically restart at the specified time each day.
@@ -11,11 +19,6 @@ auto-restart:
 
   # The time of day to restart the server, in 24-hour HH:mm format.
   restart-time: "04:00"
-
-  # The time zone for the restart time.
-  # A list of valid time zones can be found here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-  # Example: "America/New_York", "Europe/London", "UTC"
-  time-zone: "UTC"
 
   # Warning times in minutes before the restart.
   # The plugin will broadcast a message at each of these intervals.
@@ -33,17 +36,17 @@ auto-restart:
 auto-backup:
   enabled: true
   
-  # The time of day to run the backup, in 24-hour HH:mm format.
-  backup-time: "03:30"
-  
-  # The time zone for the backup time.
-  time-zone: "Europe/Stockholm"
+  # A list of times to run a backup, in 24-hour HH:mm format.
+  # You can add or remove times from this list.
+  backup-times:
+    - "08:00"
+    - "20:00"
   
   # The folder where backups will be stored (relative to the server root).
   backup-folder: "backups"
   
   # How many of the most recent backups to keep. Older ones will be deleted.
-  keep-last: 7
+  keep-last: 14
   
   # A list of folders and files to include in the backup.
   files-to-backup:

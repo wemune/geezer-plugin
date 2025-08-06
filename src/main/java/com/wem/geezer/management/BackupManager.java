@@ -49,35 +49,34 @@ public class BackupManager {
             return;
         }
 
-        String backupTimeString = config.getString("auto-backup.backup-time", "03:30");
-        String timeZoneString = config.getString("auto-backup.time-zone", "UTC");
-
-        ZoneId zoneId;
-        try {
-            zoneId = ZoneId.of(timeZoneString);
-        } catch (Exception e) {
-            Logger.severe("Invalid time-zone '" + timeZoneString + "' in config.yml for backup. Disabling auto-backup.");
-            return;
+        List<String> backupTimes = config.getStringList("auto-backup.backup-times");
+        if (backupTimes.isEmpty()) {
+            Logger.warn("No backup times specified in config.yml. Using default times: 08:00 and 20:00.");
+            backupTimes = Arrays.asList("08:00", "20:00");
         }
 
-        LocalTime backupTime;
-        try {
-            backupTime = LocalTime.parse(backupTimeString);
-        } catch (Exception e) {
-            Logger.severe("Invalid backup-time format in config.yml. Please use HH:mm format. Disabling auto-backup.");
-            return;
-        }
-
+        ZoneId zoneId = plugin.getZoneId();
         ZonedDateTime now = ZonedDateTime.now(zoneId);
-        ZonedDateTime nextBackupTime = now.with(backupTime);
-        if (now.isAfter(nextBackupTime) || now.isEqual(nextBackupTime)) {
-            nextBackupTime = nextBackupTime.plusDays(1);
+
+        for (String backupTimeString : backupTimes) {
+            LocalTime backupTime;
+            try {
+                backupTime = LocalTime.parse(backupTimeString);
+            } catch (Exception e) {
+                Logger.severe("Invalid backup-time format '" + backupTimeString + "' in config.yml. Please use HH:mm format. Skipping this time.");
+                continue;
+            }
+
+            ZonedDateTime nextBackupTime = now.with(backupTime);
+            if (now.isAfter(nextBackupTime) || now.isEqual(nextBackupTime)) {
+                nextBackupTime = nextBackupTime.plusDays(1);
+            }
+
+            long totalSecondsUntilBackup = Duration.between(now, nextBackupTime).getSeconds();
+            Logger.info("Server backup scheduled for " + backupTime + " " + zoneId + " (in " + formatDuration(totalSecondsUntilBackup) + ").");
+
+            Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, this::createBackup, totalSecondsUntilBackup * 20L);
         }
-
-        long totalSecondsUntilBackup = Duration.between(now, nextBackupTime).getSeconds();
-        Logger.info("Next server backup is scheduled for " + backupTime + " " + zoneId + " (in " + formatDuration(totalSecondsUntilBackup) + ").");
-
-        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, this::createBackup, totalSecondsUntilBackup * 20L);
     }
 
     private String formatDuration(long totalSeconds) {
@@ -148,7 +147,6 @@ public class BackupManager {
                     world.setAutoSave(true);
                 }
             });
-            Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, this::scheduleBackup, 20L);
         }
     }
 
@@ -179,7 +177,7 @@ public class BackupManager {
     }
 
     private void cleanupOldBackups(File backupFolder) {
-        int keepLast = plugin.getConfig().getInt("auto-backup.keep-last", 7);
+        int keepLast = plugin.getConfig().getInt("auto-backup.keep-last", 14);
         if (keepLast <= 0) return;
 
         File[] backupFiles = backupFolder.listFiles((dir, name) -> name.endsWith(".zip"));
