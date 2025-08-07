@@ -249,7 +249,11 @@ public class PlayerListener implements Listener {
                 if (messageFormat != null) {
                     messageFormat = messageFormat.replace("%count%", String.valueOf(veinSize));
 
-                    String finderMsg = messageFormat.replace("%player_name%", "You").replace(" has found", " have found");
+                    String finderMsg = messageFormat
+                            .replace("%player_name%", "You")
+                            .replace("&7has found", "&7have found");
+
+                    // For others, just replace the player's name.
                     String othersMsg = messageFormat.replace("%player_name%", player.getName());
 
                     Component finderComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(finderMsg);
