@@ -6,12 +6,13 @@ import com.wem.geezer.management.ContainerManager;
 import com.wem.geezer.ui.LogUI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.ShulkerBox;
 import org.bukkit.block.Container;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -32,6 +33,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class LootListener implements Listener {
 
@@ -87,7 +89,7 @@ public class LootListener implements Listener {
         logChanges(player, snapshot.getContainerId(), snapshot.getItems(), getItemsFromInventory(event.getInventory()));
     }
 
-        @EventHandler
+    @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK || !event.getPlayer().isSneaking() || event.getClickedBlock() == null) {
             return;
@@ -201,8 +203,8 @@ public class LootListener implements Listener {
         }
     }
 
-    private void logChanges(Player player, UUID containerId, Map<String, Integer> initial, Map<String, Integer> finalItems) {
-        final Map<String, Integer> changes = new HashMap<>();
+    private void logChanges(Player player, UUID containerId, Map<ItemSignature, Integer> initial, Map<ItemSignature, Integer> finalItems) {
+        final Map<ItemSignature, Integer> changes = new HashMap<>();
         initial.forEach((item, count) -> {
             int finalCount = finalItems.getOrDefault(item, 0);
             if (count != finalCount) changes.put(item, finalCount - count);
@@ -213,7 +215,7 @@ public class LootListener implements Listener {
 
         changes.forEach((item, count) -> {
             if (count == 0) return;
-            ContainerLog log = new ContainerLog(containerId, player.getUniqueId(), player.getName(), item, null, null, count, new Date());
+            ContainerLog log = new ContainerLog(containerId, player.getUniqueId(), player.getName(), item.getMaterial(), item.getDisplayName(), item.getLore(), item.getEnchantments(), count, new Date());
             try {
                 plugin.getDatabaseManager().getContainerLogDao().create(log);
             } catch (SQLException e) {
@@ -222,17 +224,20 @@ public class LootListener implements Listener {
         });
     }
 
-    private Map<String, Integer> getItemsFromInventory(Inventory inventory) {
-        Map<String, Integer> items = new HashMap<>();
+    private Map<ItemSignature, Integer> getItemsFromInventory(Inventory inventory) {
+        Map<ItemSignature, Integer> items = new HashMap<>();
         for (ItemStack item : inventory.getContents()) {
-            if (item != null) items.put(item.getType().toString(), items.getOrDefault(item.getType().toString(), 0) + item.getAmount());
+            if (item != null) {
+                ItemSignature sig = new ItemSignature(item);
+                items.put(sig, items.getOrDefault(sig, 0) + item.getAmount());
+            }
         }
         return items;
     }
 
     private static class InventorySnapshot {
         private final UUID containerId;
-        private final Map<String, Integer> items;
+        private final Map<ItemSignature, Integer> items;
 
         public InventorySnapshot(Inventory inventory, UUID containerId) {
             this.containerId = containerId;
@@ -240,12 +245,15 @@ public class LootListener implements Listener {
         }
 
         public UUID getContainerId() { return containerId; }
-        public Map<String, Integer> getItems() { return items; }
+        public Map<ItemSignature, Integer> getItems() { return items; }
 
-        private Map<String, Integer> getItems(Inventory inventory) {
-            Map<String, Integer> itemMap = new HashMap<>();
+        private Map<ItemSignature, Integer> getItems(Inventory inventory) {
+            Map<ItemSignature, Integer> itemMap = new HashMap<>();
             for (ItemStack item : inventory.getContents()) {
-                if (item != null) itemMap.put(item.getType().toString(), itemMap.getOrDefault(item.getType().toString(), 0) + item.getAmount());
+                if (item != null) {
+                    ItemSignature sig = new ItemSignature(item);
+                    itemMap.put(sig, itemMap.getOrDefault(sig, 0) + item.getAmount());
+                }
             }
             return itemMap;
         }
@@ -262,5 +270,49 @@ public class LootListener implements Listener {
 
         public UUID getContainerId() { return containerId; }
         public int getPage() { return page; }
+    }
+
+    private static class ItemSignature {
+        private final String material;
+        private final String displayName;
+        private final String lore;
+        private final String enchantments;
+
+        public ItemSignature(ItemStack item) {
+            this.material = item.getType().toString();
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) {
+                this.displayName = meta.hasDisplayName() ? LegacyComponentSerializer.legacyAmpersand().serialize(meta.displayName()) : null;
+                this.lore = meta.hasLore() ? meta.lore().stream().map(line -> LegacyComponentSerializer.legacyAmpersand().serialize(line)).collect(Collectors.joining("\n")) : null;
+                this.enchantments = meta.hasEnchants() ? meta.getEnchants().entrySet().stream()
+                        .map(entry -> entry.getKey().getKey().getKey() + ":" + entry.getValue())
+                        .collect(Collectors.joining(",")) : null;
+            } else {
+                this.displayName = null;
+                this.lore = null;
+                this.enchantments = null;
+            }
+        }
+
+        public String getMaterial() { return material; }
+        public String getDisplayName() { return displayName; }
+        public String getLore() { return lore; }
+        public String getEnchantments() { return enchantments; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ItemSignature that = (ItemSignature) o;
+            return Objects.equals(material, that.material) &&
+                    Objects.equals(displayName, that.displayName) &&
+                    Objects.equals(lore, that.lore) &&
+                    Objects.equals(enchantments, that.enchantments);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(material, displayName, lore, enchantments);
+        }
     }
 }

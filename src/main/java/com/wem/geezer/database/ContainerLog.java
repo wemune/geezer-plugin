@@ -30,6 +30,9 @@ public class ContainerLog {
     @DatabaseField
     private String itemLore;
 
+    @DatabaseField
+    private String enchantments;
+
     @DatabaseField(canBeNull = false)
     private int quantityChange;
 
@@ -39,13 +42,14 @@ public class ContainerLog {
     public ContainerLog() {
     }
 
-    public ContainerLog(UUID containerUUID, UUID playerUUID, String playerName, String itemMaterial, String itemDisplayName, String itemLore, int quantityChange, Date timestamp) {
+    public ContainerLog(UUID containerUUID, UUID playerUUID, String playerName, String itemMaterial, String itemDisplayName, String itemLore, String enchantments, int quantityChange, Date timestamp) {
         this.containerUUID = containerUUID;
         this.playerUUID = playerUUID;
         this.playerName = playerName;
         this.itemMaterial = itemMaterial;
         this.itemDisplayName = itemDisplayName;
         this.itemLore = itemLore;
+        this.enchantments = enchantments;
         this.quantityChange = quantityChange;
         this.timestamp = timestamp;
     }
@@ -54,6 +58,8 @@ public class ContainerLog {
     public UUID getPlayerUUID() { return playerUUID; }
     public String getPlayerName() { return playerName; }
     public String getItemMaterial() { return itemMaterial; }
+    public String getItemDisplayName() { return itemDisplayName; }
+    public String getEnchantments() { return enchantments; }
     public int getQuantityChange() { return quantityChange; }
     public Date getTimestamp() { return timestamp; }
 }

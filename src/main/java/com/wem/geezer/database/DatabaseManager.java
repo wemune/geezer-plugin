@@ -67,6 +67,22 @@ public class DatabaseManager {
                 }
             }
         }
+
+        // Migration for container_logs table
+        try {
+            containerLogDao.queryBuilder().selectColumns("enchantments").limit(1L).query();
+        } catch (SQLException e) {
+            if (e.getMessage().contains("no such column: enchantments")) {
+                try {
+                    Logger.info("Performing database schema upgrade: Adding 'enchantments' column to container_logs.");
+                    containerLogDao.executeRaw("ALTER TABLE container_logs ADD COLUMN enchantments VARCHAR;");
+                    Logger.info("Database schema upgrade successful for container_logs.");
+                } catch (SQLException ex) {
+                    Logger.severe("Critical error during database schema upgrade for container_logs.");
+                    ex.printStackTrace();
+                }
+            }
+        }
     }
 
     public void close() {

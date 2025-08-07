@@ -4,18 +4,18 @@ import com.wem.geezer.database.ContainerLog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class LogUI {
@@ -99,12 +99,38 @@ public class LogUI {
         if (meta != null) {
             NamedTextColor titleColor = wasAdded ? NamedTextColor.GREEN : NamedTextColor.RED;
             String action = wasAdded ? "Added" : "Removed";
+            
+            Component prefix = Component.text(action + ": ", titleColor);
+            Component itemName;
 
-            Component displayName = Component.text(action + ": " + log.getItemMaterial(), titleColor)
-                    .decoration(TextDecoration.ITALIC, false);
-            meta.displayName(displayName);
+            if (log.getItemDisplayName() != null) {
+                itemName = LegacyComponentSerializer.legacyAmpersand().deserialize(log.getItemDisplayName());
+            } else {
+                itemName = Component.text(log.getItemMaterial());
+            }
+
+            meta.displayName(prefix.append(itemName).decoration(TextDecoration.ITALIC, false));
+
+            if (log.getEnchantments() != null && !log.getEnchantments().isEmpty()) {
+                String[] enchantPairs = log.getEnchantments().split(",");
+                for (String pair : enchantPairs) {
+                    String[] parts = pair.split(":");
+                    if (parts.length == 2) {
+                        Enchantment ench = Enchantment.getByKey(NamespacedKey.minecraft(parts[0]));
+                        if (ench != null) {
+                            try {
+                                int level = Integer.parseInt(parts[1]);
+                                meta.addEnchant(ench, level, true);
+                            } catch (NumberFormatException ignored) {}
+                        }
+                    }
+                }
+            }
 
             List<Component> lore = new ArrayList<>();
+            if (log.getItemDisplayName() != null) {
+                lore.add(Component.text("Base: " + log.getItemMaterial(), NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false));
+            }
             lore.add(Component.text("Amount: " + Math.abs(log.getQuantityChange()), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
             lore.add(Component.text("By: " + log.getPlayerName(), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
             lore.add(Component.text("Date: " + dateFormat.format(log.getTimestamp()), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
