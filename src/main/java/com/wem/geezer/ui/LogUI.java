@@ -132,7 +132,9 @@ public class LogUI {
                 lore.add(Component.text("Base: " + log.getItemMaterial(), NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false));
             }
             lore.add(Component.text("Amount: " + Math.abs(log.getQuantityChange()), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
-            lore.add(Component.text("By: " + log.getPlayerName(), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+            lore.add(Component.text("By: ", NamedTextColor.GRAY)
+                    .append(Component.text(log.getPlayerName(), NamedTextColor.WHITE))
+                    .decoration(TextDecoration.ITALIC, false));
             lore.add(Component.text("Date: " + dateFormat.format(log.getTimestamp()), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
             lore.add(Component.text("(" + formatTimeAgo(log.getTimestamp()) + ")", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
 
