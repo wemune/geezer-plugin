@@ -48,3 +48,6 @@ commands:
     usage: "/togglerestart"
     permission: geezer.togglerestart
     permission-message: "You do not have permission to use this command."
+  colors:
+    description: "Displays a list of all Minecraft color codes."
+    usage: "/colors"
