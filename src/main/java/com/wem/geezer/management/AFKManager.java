@@ -52,7 +52,7 @@ public class AFKManager implements Listener {
     private void setPlayerAfk(Player player) {
         afkPlayers.add(player.getUniqueId());
         Component message = LegacyComponentSerializer.legacySection().deserialize(String.format("§f%s §7is now AFK.", player.getName()));
-        Component selfMessage = LegacyComponentSerializer.legacySection().deserialize("§7You are now AFK.");
+        Component selfMessage = LegacyComponentSerializer.legacySection().deserialize("§fYou §7are now AFK.");
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
@@ -66,7 +66,7 @@ public class AFKManager implements Listener {
     private void setPlayerActive(Player player) {
         afkPlayers.remove(player.getUniqueId());
         Component message = LegacyComponentSerializer.legacySection().deserialize(String.format("§f%s §7is no longer AFK.", player.getName()));
-        Component selfMessage = LegacyComponentSerializer.legacySection().deserialize("§7You are no longer AFK.");
+        Component selfMessage = LegacyComponentSerializer.legacySection().deserialize("§fYou §7are no longer AFK.");
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {

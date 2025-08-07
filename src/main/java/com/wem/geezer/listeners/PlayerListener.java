@@ -318,7 +318,7 @@ public class PlayerListener implements Listener {
             String messageForOthersStr = legacyDeathMessage;
 
             Location loc = player.getLocation();
-            String deathCoordsStr = String.format("§7You died at §bX: §f%d, §bY: §f%d, §bZ: §f%d §7in §f%s", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), loc.getWorld().getName());
+            String deathCoordsStr = String.format("§fYou §7died at §bX: §f%d, §bY: §f%d, §bZ: §f%d §7in §f%s", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), loc.getWorld().getName());
 
             event.deathMessage(null);
 
