@@ -95,6 +95,11 @@ public class LootListener implements Listener {
             return;
         }
 
+        ItemStack itemInHand = event.getItem();
+        if (itemInHand != null && itemInHand.getType().isBlock()) {
+            return;
+        }
+
         BlockState blockState = event.getClickedBlock().getState();
         Player player = event.getPlayer();
         UUID containerId;
