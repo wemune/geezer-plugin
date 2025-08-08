@@ -9,6 +9,7 @@ import com.wem.geezer.listeners.CommandListener;
 import com.wem.geezer.listeners.LootListener;
 import com.wem.geezer.listeners.PlayerListener;
 import com.wem.geezer.listeners.SignListener;
+import com.wem.geezer.listeners.WorldListener;
 import com.wem.geezer.management.*;
 import com.wem.geezer.util.Logger;
 import net.kyori.adventure.text.Component;
@@ -37,6 +38,7 @@ public final class Geezer extends JavaPlugin {
     private AFKManager afkManager;
     private BackupManager backupManager;
     private ContainerManager containerManager;
+    private DaylightManager daylightManager;
     private ZoneId zoneId;
     private final Map<UUID, Long> joinTimes = new ConcurrentHashMap<>();
     private final Map<UUID, UUID> lastMessageSender = new ConcurrentHashMap<>();
@@ -72,12 +74,14 @@ public final class Geezer extends JavaPlugin {
         afkManager = new AFKManager(this);
         backupManager = new BackupManager(this);
         containerManager = new ContainerManager(this);
+        daylightManager = new DaylightManager(this);
 
         getServer().getPluginManager().registerEvents(new PlayerListener(this, playerListManager), this);
         getServer().getPluginManager().registerEvents(new SignListener(), this);
         getServer().getPluginManager().registerEvents(new AnvilListener(), this);
         getServer().getPluginManager().registerEvents(new CommandListener(this), this);
         getServer().getPluginManager().registerEvents(new LootListener(this), this);
+        getServer().getPluginManager().registerEvents(new WorldListener(), this);
         getServer().getPluginManager().registerEvents(afkManager, this);
 
         Objects.requireNonNull(getCommand("playtime")).setExecutor(new PlaytimeCommand(this));

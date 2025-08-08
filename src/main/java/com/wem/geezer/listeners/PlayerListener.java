@@ -242,6 +242,9 @@ public class PlayerListener implements Listener {
                 String messageFormat = null;
                 if (blockType == Material.DIAMOND_ORE || blockType == Material.DEEPSLATE_DIAMOND_ORE) {
                     messageFormat = plugin.getConfig().getString("rare-ore-announcements.diamond-message", "&f%player_name% &7has found &b%count% Diamonds&7!");
+                    if (veinSize == 1) {
+                        messageFormat = messageFormat.replace("Diamonds", "Diamond");
+                    }
                 } else if (blockType == Material.ANCIENT_DEBRIS) {
                     messageFormat = plugin.getConfig().getString("rare-ore-announcements.ancient-debris-message", "&f%player_name% &7has found &c%count% Ancient Debris&7!");
                 }
@@ -253,7 +256,6 @@ public class PlayerListener implements Listener {
                             .replace("%player_name%", "You")
                             .replace("&7has found", "&7have found");
 
-                    // For others, just replace the player's name.
                     String othersMsg = messageFormat.replace("%player_name%", player.getName());
 
                     Component finderComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(finderMsg);

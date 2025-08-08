@@ -4,7 +4,6 @@ import com.wem.geezer.Geezer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -91,8 +90,6 @@ public class AFKManager implements Listener {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
-        // The PlayerMoveEvent fires for both position and rotation changes.
-        // We check if the player has actually moved their position or camera.
         if (event.hasChangedPosition() || event.hasChangedOrientation()) {
             Player player = event.getPlayer();
             lastMoveTimes.put(player.getUniqueId(), System.currentTimeMillis());
