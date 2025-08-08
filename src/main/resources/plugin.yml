@@ -51,3 +51,15 @@ commands:
   colors:
     description: "Displays a list of all Minecraft color codes."
     usage: "/colors"
+permissions:
+  geezer.admin:
+    description: "Grants access to all Geezer admin commands."
+    children:
+      - geezer.backup
+      - geezer.togglerestart
+  geezer.backup:
+    description: "Allows the user to start a manual backup."
+    default: op
+  geezer.togglerestart:
+    description: "Allows the user to toggle the auto-restart schedule."
+    default: op

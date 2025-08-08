@@ -45,7 +45,6 @@ shadowJar {
     archiveFileName = 'Geezer.jar'
 
     // Relocate dependencies to avoid conflicts with other plugins
-    // This is critical for a stable plugin
     relocate 'com.j256.ormlite', 'com.wem.geezer.libs.ormlite'
     relocate 'com.zaxxer.hikari', 'com.wem.geezer.libs.hikaricp'
     relocate 'org.xerial.sqlite', 'com.wem.geezer.libs.sqlite'
