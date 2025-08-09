@@ -25,7 +25,7 @@ public class ReplyCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            plugin.sendMessage(sender, Component.text("This command can only be run by a player.", NamedTextColor.RED));
+            plugin.sendMessage(sender, Component.text("The console cannot use /reply. Please use /msg <player> <message>.", NamedTextColor.RED));
             return true;
         }
 
@@ -49,11 +49,7 @@ public class ReplyCommand implements CommandExecutor {
             return true;
         }
 
-        StringBuilder messageBuilder = new StringBuilder();
-        for (String arg : args) {
-            messageBuilder.append(arg).append(" ");
-        }
-        String message = messageBuilder.toString().trim();
+        String message = String.join(" ", args);
 
         Component toSender = LegacyComponentSerializer.legacySection().deserialize(String.format("§7[§fYou §b-> §f%s§7] §f%s", target.getName(), message));
         Component toTarget = LegacyComponentSerializer.legacySection().deserialize(String.format("§7[§f%s §b-> §fYou§7] §f%s", player.getName(), message));

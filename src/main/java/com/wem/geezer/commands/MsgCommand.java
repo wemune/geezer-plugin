@@ -10,6 +10,7 @@ import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 public class MsgCommand implements CommandExecutor {
@@ -22,11 +23,6 @@ public class MsgCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player)) {
-            plugin.sendMessage(sender, Component.text("This command can only be run by a player.", NamedTextColor.RED));
-            return true;
-        }
-
         if (args.length < 2) {
             plugin.sendMessage(sender, Component.text("Usage: /msg <player> <message>", NamedTextColor.RED));
             return true;
@@ -39,29 +35,28 @@ public class MsgCommand implements CommandExecutor {
             return true;
         }
 
-        Player player = (Player) sender;
-        if (player.equals(target)) {
+        if (sender instanceof Player && sender.equals(target)) {
             plugin.sendMessage(sender, Component.text("You cannot message yourself.", NamedTextColor.RED));
             return true;
         }
 
-        StringBuilder messageBuilder = new StringBuilder();
-        for (int i = 1; i < args.length; i++) {
-            messageBuilder.append(args[i]).append(" ");
-        }
-        String message = messageBuilder.toString().trim();
+        String message = String.join(" ", args).substring(args[0].length() + 1);
+        String senderName = (sender instanceof Player) ? sender.getName() : "Server";
 
         Component toSender = LegacyComponentSerializer.legacySection().deserialize(String.format("§7[§fYou §b-> §f%s§7] §f%s", target.getName(), message));
-        Component toTarget = LegacyComponentSerializer.legacySection().deserialize(String.format("§7[§f%s §b-> §fYou§7] §f%s", player.getName(), message));
+        Component toTarget = LegacyComponentSerializer.legacySection().deserialize(String.format("§7[§c%s §b-> §fYou§7] §f%s", senderName, message));
 
-        plugin.sendMessage(player, toSender);
+        plugin.sendMessage(sender, toSender);
         plugin.sendMessage(target, toTarget);
         target.playSound(target.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 1.0f);
 
-        plugin.getLastMessageSender().put(target.getUniqueId(), player.getUniqueId());
-        plugin.getLastMessageSender().put(player.getUniqueId(), target.getUniqueId());
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+            plugin.getLastMessageSender().put(target.getUniqueId(), player.getUniqueId());
+            plugin.getLastMessageSender().put(player.getUniqueId(), target.getUniqueId());
+        }
 
-        Logger.info(String.format("[PM] %s -> %s: %s", player.getName(), target.getName(), message));
+        Logger.info(String.format("[PM] %s -> %s: %s", senderName, target.getName(), message));
 
         return true;
     }
