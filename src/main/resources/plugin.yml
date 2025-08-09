@@ -27,6 +27,8 @@ commands:
   msg:
     description: "Send a private message to a player."
     usage: "/msg <player> <message>"
+    aliases: [tell, m, w]
+    override: true
   reply:
     description: "Reply to the last person who messaged you."
     usage: "/r <message>"
