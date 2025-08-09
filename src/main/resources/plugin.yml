@@ -53,15 +53,24 @@ commands:
   colors:
     description: "Displays a list of all Minecraft color codes."
     usage: "/colors"
+  broadcast:
+    description: "Broadcasts a message to the entire server."
+    usage: "/broadcast <message>"
+    permission: geezer.broadcast
+    permission-message: "You do not have permission to use this command."
 permissions:
   geezer.admin:
     description: "Grants access to all Geezer admin commands."
     children:
       - geezer.backup
       - geezer.togglerestart
+      - geezer.broadcast
   geezer.backup:
     description: "Allows the user to start a manual backup."
     default: op
   geezer.togglerestart:
     description: "Allows the user to toggle the auto-restart schedule."
+    default: op
+  geezer.broadcast:
+    description: "Allows the user to broadcast a message to the server."
     default: op

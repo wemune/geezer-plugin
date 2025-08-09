@@ -97,6 +97,7 @@ public final class Geezer extends JavaPlugin {
         Objects.requireNonNull(getCommand("backup")).setExecutor(new BackupCommand(this));
         Objects.requireNonNull(getCommand("togglerestart")).setExecutor(new ToggleRestartCommand(this));
         Objects.requireNonNull(getCommand("colors")).setExecutor(new ColorsCommand(this));
+        Objects.requireNonNull(getCommand("broadcast")).setExecutor(new BroadcastCommand(this));
 
         Bukkit.getScheduler().runTaskTimer(this, () -> statsManager.saveAll(), 1200L, 1200L);
         restartManager.scheduleRestart();
