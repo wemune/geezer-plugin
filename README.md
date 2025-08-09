@@ -19,13 +19,14 @@ A private Minecraft server plugin with a variety of features for Geezer World.
 - **/ping [player]**: Check your or another player's ping.
 - **/seen <player>**: Check when a player was last online.
 - **/coords [player]**: Broadcast your coordinates or send them privately to a player.
-- **/msg <player> <message>**: Send a private message to a player.
-- **/reply <message>**: Reply to the last person who messaged you.
+- **/msg <player> <message>**: Send a private message to a player. Aliases: `/tell`, `/w`, `/m`.
+- **/reply <message>**: Reply to the last person who messaged you. Alias: `/r`.
 - **/time**: Shows the current in-game time and time until the next sunrise/sunset.
 - **/help**: Displays a list of all plugin commands.
 - **/colors**: Shows the available color codes for use on signs and anvils.
 - **/backup**: Manually starts a server backup.
 - **/togglerestart**: Toggles the automatic restart schedule on or off.
+- **/broadcast <message>**: Broadcasts a message to the entire server. Alias: `/bc`.
 
 ### Gameplay & Events
 - **Color Support**: Players can use color codes on signs and when renaming items in anvils.
@@ -49,7 +50,8 @@ Below is a list of all available permission nodes.
 ### Admin Permissions
 - `geezer.backup`: Grants access to the `/backup` command.
 - `geezer.togglerestart`: Grants access to the `/togglerestart` command.
-- `geezer.admin`: A parent node that grants all admin permissions (`geezer.backup`, `geezer.togglerestart`).
+- `geezer.broadcast`: Grants access to the `/broadcast` command.
+- `geezer.admin`: A parent node that grants all admin permissions (`geezer.backup`, `geezer.togglerestart`, `geezer.broadcast`).
 
 ## Database
 
