@@ -58,6 +58,7 @@ commands:
     usage: "/broadcast <message>"
     permission: geezer.broadcast
     permission-message: "You do not have permission to use this command."
+    aliases: [bc]
 permissions:
   geezer.admin:
     description: "Grants access to all Geezer admin commands."
