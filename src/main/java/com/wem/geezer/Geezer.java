@@ -17,6 +17,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.sql.SQLException;
 import java.time.ZoneId;
@@ -40,6 +41,7 @@ public final class Geezer extends JavaPlugin {
     private ContainerManager containerManager;
     private DaylightManager daylightManager;
     private ZoneId zoneId;
+    private BukkitTask activeBroadcastTask;
     private final Map<UUID, Long> joinTimes = new ConcurrentHashMap<>();
     private final Map<UUID, UUID> lastMessageSender = new ConcurrentHashMap<>();
     private final Map<UUID, Long> coordsCooldowns = new ConcurrentHashMap<>();
@@ -127,6 +129,10 @@ public final class Geezer extends JavaPlugin {
     }
 
     public void broadcast(Component message) {
+        if (activeBroadcastTask != null) {
+            activeBroadcastTask.cancel();
+        }
+
         Component broadcastMessage = PREFIX.append(message);
         getServer().broadcast(broadcastMessage);
 
@@ -134,7 +140,7 @@ public final class Geezer extends JavaPlugin {
             player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.5f);
         }
 
-        new org.bukkit.scheduler.BukkitRunnable() {
+        activeBroadcastTask = new org.bukkit.scheduler.BukkitRunnable() {
             private int count = 0;
             private final int durationInSeconds = 5;
 
