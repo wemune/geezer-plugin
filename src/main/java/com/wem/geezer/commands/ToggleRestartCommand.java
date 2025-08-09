@@ -31,12 +31,12 @@ public class ToggleRestartCommand implements CommandExecutor {
         if (restartManager.isRestartScheduled()) {
             if (restartManager.cancelRestart()) {
                 Component successMessage = Component.text("The scheduled server restart has been DISABLED.", NamedTextColor.RED, TextDecoration.BOLD);
-                plugin.getServer().broadcast(Geezer.PREFIX.append(successMessage));
+                plugin.broadcast(successMessage);
             }
         } else {
             restartManager.scheduleRestart();
             Component successMessage = Component.text("The scheduled server restart has been ENABLED.", NamedTextColor.RED, TextDecoration.BOLD);
-            plugin.getServer().broadcast(Geezer.PREFIX.append(successMessage));
+            plugin.broadcast(successMessage);
         }
 
         return true;

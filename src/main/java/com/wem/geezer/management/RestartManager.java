@@ -3,7 +3,8 @@ package com.wem.geezer.management;
 import com.wem.geezer.Geezer;
 import com.wem.geezer.util.Logger;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitTask;
@@ -81,23 +82,15 @@ public class RestartManager {
     }
 
     private void broadcastRestartWarning(int minutes) {
-        broadcastRestartWarning(minutes, "minute");
-    }
-
-    private void broadcastRestartWarning(int value, String unit) {
-        String timeString = value + " " + unit + (value > 1 ? "s" : "");
-        String message = "§c§lServer is restarting in " + timeString + ".";
-        Component component = LegacyComponentSerializer.legacySection().deserialize(message);
-        
-        plugin.sendMessage(Bukkit.getConsoleSender(), component);
-        for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
-            plugin.sendMessage(player, component);
-        }
+        String timeString = minutes + " " + (minutes > 1 ? "minutes" : "minute");
+        Component message = Component.text("Server is restarting in " + timeString + ".", NamedTextColor.RED, TextDecoration.BOLD);
+        plugin.broadcast(message);
     }
 
     public void startManualRestart() {
         cancelRestart();
-        broadcastRestartWarning(10, "second");
+        Component message = Component.text("Server is restarting in 10 seconds.", NamedTextColor.RED, TextDecoration.BOLD);
+        plugin.broadcast(message);
         BukkitTask mainTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
             Logger.info("Executing manual server restart...");
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "restart");

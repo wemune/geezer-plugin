@@ -126,6 +126,33 @@ public final class Geezer extends JavaPlugin {
         sender.sendMessage(PREFIX.append(message));
     }
 
+    public void broadcast(Component message) {
+        Component broadcastMessage = PREFIX.append(message);
+        getServer().broadcast(broadcastMessage);
+
+        for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
+            player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.5f);
+        }
+
+        new org.bukkit.scheduler.BukkitRunnable() {
+            private int count = 0;
+            private final int durationInSeconds = 5;
+
+            @Override
+            public void run() {
+                if (count >= durationInSeconds) {
+                    this.cancel();
+                    return;
+                }
+
+                for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
+                    player.sendActionBar(message);
+                }
+                count++;
+            }
+        }.runTaskTimer(this, 0L, 20L);
+    }
+
     public DatabaseManager getDatabaseManager() {
         return databaseManager;
     }

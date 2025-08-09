@@ -3,7 +3,8 @@ package com.wem.geezer.management;
 import com.wem.geezer.Geezer;
 import com.wem.geezer.util.Logger;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -93,7 +94,7 @@ public class BackupManager {
         }
 
         FileConfiguration config = plugin.getConfig();
-        broadcastMessage("§c§lStarting server backup...");
+        plugin.broadcast(Component.text("Starting server backup...", NamedTextColor.RED, TextDecoration.BOLD));
 
         Bukkit.getScheduler().runTask(plugin, () -> {
             for (World world : Bukkit.getWorlds()) {
@@ -132,14 +133,14 @@ public class BackupManager {
             }
 
             Logger.info("Backup created successfully: " + zipFileName);
-            broadcastMessage("§c§lServer backup complete.");
+            plugin.broadcast(Component.text("Server backup complete.", NamedTextColor.RED, TextDecoration.BOLD));
 
             cleanupOldBackups(backupFolder);
 
         } catch (Exception e) {
             Logger.severe("An error occurred while creating the backup!");
             e.printStackTrace();
-            broadcastMessage("§c§lAn error occurred during backup. Please check the console.");
+            plugin.broadcast(Component.text("An error occurred during backup. Please check the console.", NamedTextColor.RED, TextDecoration.BOLD));
         } finally {
             isBackupRunning.set(false);
             Bukkit.getScheduler().runTask(plugin, () -> {
@@ -150,13 +151,7 @@ public class BackupManager {
         }
     }
 
-    private void broadcastMessage(String message) {
-        Component component = LegacyComponentSerializer.legacySection().deserialize(message);
-        plugin.sendMessage(Bukkit.getConsoleSender(), component);
-        for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
-            plugin.sendMessage(player, component);
-        }
-    }
+    
 
     private void addFileToZip(File file, String parentPath, ZipOutputStream zos) throws IOException {
         if (file.isDirectory()) {
