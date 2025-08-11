@@ -87,7 +87,6 @@ public class StatsCommand implements CommandExecutor {
         plugin.sendMessage(sender, LegacyComponentSerializer.legacySection().deserialize("§7Mobs Killed: §f" + stats.getMobsKilled()));
         plugin.sendMessage(sender, LegacyComponentSerializer.legacySection().deserialize("§7Deaths: §f" + stats.getDeaths()));
         plugin.sendMessage(sender, LegacyComponentSerializer.legacySection().deserialize("§7Distance Traveled: §f" + df.format(km) + " km"));
-        sender.sendMessage(Component.text("")); // For spacing
         plugin.sendMessage(sender, LegacyComponentSerializer.legacySection().deserialize("§3--- Ores Mined ---"));
         plugin.sendMessage(sender, LegacyComponentSerializer.legacySection().deserialize("§bDiamonds: §f" + stats.getDiamondOreMined()));
         plugin.sendMessage(sender, LegacyComponentSerializer.legacySection().deserialize("§4Ancient Debris: §f" + stats.getAncientDebrisMined()));

@@ -40,11 +40,9 @@ public class DatabaseManager {
 
         ConnectionSource connectionSource = new DataSourceConnectionSource(dataSource, dataSource.getJdbcUrl());
 
-        // Create tables if they don't exist
         TableUtils.createTableIfNotExists(connectionSource, PlayerStats.class);
         TableUtils.createTableIfNotExists(connectionSource, ContainerLog.class);
 
-        // Initialize DAOs
         playerStatsDao = DaoManager.createDao(connectionSource, PlayerStats.class);
         containerLogDao = DaoManager.createDao(connectionSource, ContainerLog.class);
 
@@ -52,7 +50,6 @@ public class DatabaseManager {
     }
 
     private void performSchemaMigration() {
-        // Migration for player_stats table
         try {
             playerStatsDao.queryBuilder().selectColumns("lastSeen").limit(1L).query();
         } catch (SQLException e) {
@@ -68,7 +65,6 @@ public class DatabaseManager {
             }
         }
 
-        // Migration for container_logs table
         try {
             containerLogDao.queryBuilder().selectColumns("enchantments").limit(1L).query();
         } catch (SQLException e) {

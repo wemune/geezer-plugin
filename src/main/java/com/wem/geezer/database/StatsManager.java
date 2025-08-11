@@ -52,7 +52,7 @@ public class StatsManager {
                 plugin.getDatabaseManager().getPlayerStatsDao().createOrUpdate(stats);
             } catch (SQLException e) {
                 Logger.severe("Failed to save stats for " + stats.getPlayerUUID());
-                e.printStackTrace();
+                plugin.getLogger().severe("Failed to save stats for " + stats.getPlayerUUID());
             }
         });
     }
@@ -63,7 +63,7 @@ public class StatsManager {
     public void saveAll() {
         saveCount++;
         long now = System.currentTimeMillis();
-        if (now - lastLogTime > 1800000) { // 30 minutes
+        if (now - lastLogTime > 1800000) {
             Logger.info("Saved all player data " + saveCount + " times in the last 30 minutes.");
             lastLogTime = now;
             saveCount = 0;
