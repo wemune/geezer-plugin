@@ -42,7 +42,6 @@ public final class Geezer extends JavaPlugin {
     private AFKManager afkManager;
     private BackupManager backupManager;
     private ContainerManager containerManager;
-    private DaylightManager daylightManager;
     private ZoneId zoneId;
 
     private final Queue<Component> announcementQueue = new ConcurrentLinkedQueue<>();
@@ -82,7 +81,7 @@ public final class Geezer extends JavaPlugin {
         afkManager = new AFKManager(this);
         backupManager = new BackupManager(this);
         containerManager = new ContainerManager(this);
-        daylightManager = new DaylightManager(this);
+        new DaylightManager(this);
 
         getServer().getPluginManager().registerEvents(new PlayerListener(this, playerListManager), this);
         getServer().getPluginManager().registerEvents(new SignListener(), this);
