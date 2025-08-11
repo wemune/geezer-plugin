@@ -17,6 +17,7 @@ public class DatabaseManager {
 
     private final JavaPlugin plugin;
     private HikariDataSource dataSource;
+    private ConnectionSource connectionSource;
     private Dao<PlayerStats, UUID> playerStatsDao;
     private Dao<ContainerLog, Integer> containerLogDao;
 
@@ -38,7 +39,7 @@ public class DatabaseManager {
         dataSource.setMaxLifetime(60000);
         dataSource.setMaximumPoolSize(10);
 
-        ConnectionSource connectionSource = new DataSourceConnectionSource(dataSource, dataSource.getJdbcUrl());
+        this.connectionSource = new DataSourceConnectionSource(dataSource, dataSource.getJdbcUrl());
 
         TableUtils.createTableIfNotExists(connectionSource, PlayerStats.class);
         TableUtils.createTableIfNotExists(connectionSource, ContainerLog.class);
@@ -59,8 +60,7 @@ public class DatabaseManager {
                     playerStatsDao.executeRaw("ALTER TABLE player_stats ADD COLUMN lastSeen DATETIME;");
                     Logger.info("Database schema upgrade successful for player_stats.");
                 } catch (SQLException ex) {
-                    Logger.severe("Critical error during database schema upgrade for player_stats.");
-                    ex.printStackTrace();
+                    Logger.severe("Critical error during database schema upgrade for player_stats: " + ex.getMessage());
                 }
             }
         }
@@ -74,14 +74,20 @@ public class DatabaseManager {
                     containerLogDao.executeRaw("ALTER TABLE container_logs ADD COLUMN enchantments VARCHAR;");
                     Logger.info("Database schema upgrade successful for container_logs.");
                 } catch (SQLException ex) {
-                    Logger.severe("Critical error during database schema upgrade for container_logs.");
-                    ex.printStackTrace();
+                    Logger.severe("Critical error during database schema upgrade for container_logs: " + ex.getMessage());
                 }
             }
         }
     }
 
     public void close() {
+        if (connectionSource != null) {
+            try {
+                connectionSource.close();
+            } catch (Exception e) {
+                Logger.warn("Error closing database connection source: " + e.getMessage());
+            }
+        }
         if (dataSource != null && !dataSource.isClosed()) {
             dataSource.close();
         }

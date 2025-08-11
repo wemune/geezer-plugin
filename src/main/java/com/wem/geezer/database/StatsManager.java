@@ -51,8 +51,7 @@ public class StatsManager {
             try {
                 plugin.getDatabaseManager().getPlayerStatsDao().createOrUpdate(stats);
             } catch (SQLException e) {
-                Logger.severe("Failed to save stats for " + stats.getPlayerUUID());
-                plugin.getLogger().severe("Failed to save stats for " + stats.getPlayerUUID());
+                Logger.severe("Failed to save stats for " + stats.getPlayerUUID() + ": " + e.getMessage());
             }
         });
     }
@@ -63,7 +62,7 @@ public class StatsManager {
     public void saveAll() {
         saveCount++;
         long now = System.currentTimeMillis();
-        if (now - lastLogTime > 1800000) {
+        if (now - lastLogTime > Geezer.STATS_SAVE_LOG_INTERVAL_MS) {
             Logger.info("Saved all player data " + saveCount + " times in the last 30 minutes.");
             lastLogTime = now;
             saveCount = 0;

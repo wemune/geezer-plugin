@@ -40,6 +40,12 @@ import java.util.logging.Level;
 public final class Geezer extends JavaPlugin {
 
     public static final Component PREFIX = LegacyComponentSerializer.legacyAmpersand().deserialize("&b[Geezer] &r");
+    
+    private static final long STATS_SAVE_INTERVAL_TICKS = 1200L;
+    private static final long ANNOUNCER_DELAY_TICKS = 100L;
+    private static final int DB_EXECUTOR_SHUTDOWN_TIMEOUT_SECONDS = 10;
+    private static final int DB_EXECUTOR_FORCED_SHUTDOWN_TIMEOUT_SECONDS = 5;
+    public static final long STATS_SAVE_LOG_INTERVAL_MS = 1800000L;
 
     private DatabaseManager databaseManager;
     private StatsManager statsManager;
@@ -117,7 +123,7 @@ public final class Geezer extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new WorldListener(), this);
         getServer().getPluginManager().registerEvents(afkManager, this);
 
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> statsManager.saveAll(), 1200L, 1200L);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> statsManager.saveAll(), STATS_SAVE_INTERVAL_TICKS, STATS_SAVE_INTERVAL_TICKS);
         restartManager.scheduleRestart();
         playerListManager.start();
         afkManager.start();
@@ -144,9 +150,9 @@ public final class Geezer extends JavaPlugin {
 
         dbExecutor.shutdown();
         try {
-            if (!dbExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
+            if (!dbExecutor.awaitTermination(DB_EXECUTOR_SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                 dbExecutor.shutdownNow();
-                if (!dbExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                if (!dbExecutor.awaitTermination(DB_EXECUTOR_FORCED_SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                     getLogger().log(Level.WARNING, "DB executor did not terminate after forced shutdown");
                 }
             }
@@ -174,25 +180,25 @@ public final class Geezer extends JavaPlugin {
     private void tryStartAnnouncer() {
         if (isAnnouncementRunning.compareAndSet(false, true)) {
             announcerTask = new BukkitRunnable() {
-                 @Override
-                 public void run() {
-                     Component messageToBroadcast = announcementQueue.poll();
-                     if (messageToBroadcast != null) {
-                         Component broadcastMessage = PREFIX.append(messageToBroadcast);
-                         getServer().broadcast(broadcastMessage);
+                @Override
+                public void run() {
+                    Component messageToBroadcast = announcementQueue.poll();
+                    if (messageToBroadcast != null) {
+                        Component broadcastMessage = PREFIX.append(messageToBroadcast);
+                        getServer().broadcast(broadcastMessage);
 
-                         for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
-                             player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.5f);
-                             player.sendActionBar(messageToBroadcast);
-                         }
-                     } else {
-                         isAnnouncementRunning.set(false);
-                         this.cancel();
-                     }
-                 }
-            }.runTaskTimer(this, 0L, 100L);
-         }
-     }
+                        for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
+                            player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.5f);
+                            player.sendActionBar(messageToBroadcast);
+                        }
+                    } else {
+                        isAnnouncementRunning.set(false);
+                        this.cancel();
+                    }
+                }
+            }.runTaskTimer(this, 0L, ANNOUNCER_DELAY_TICKS);
+        }
+    }
 
      public DatabaseManager getDatabaseManager() {
          return databaseManager;

@@ -1,9 +1,15 @@
 package com.wem.geezer.management;
 
 import com.wem.geezer.Geezer;
+import com.wem.geezer.util.Logger;
 import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.zone.ZoneRulesException;
 import java.util.List;
 
 @Getter
@@ -63,15 +69,19 @@ public class ConfigManager {
 
         // General
         timezone = config.getString("timezone", "Europe/Stockholm");
+        validateTimezone();
 
         // Auto Restart
         autoRestartEnabled = config.getBoolean("auto-restart.enabled", true);
         autoRestartTime = config.getString("auto-restart.restart-time", "04:00");
+        validateTime(autoRestartTime, "auto-restart.restart-time");
         autoRestartWarningMinutes = config.getIntegerList("auto-restart.warning-minutes");
+        validateWarningMinutes();
 
         // Auto Backup
         autoBackupEnabled = config.getBoolean("auto-backup.enabled", true);
         autoBackupTimes = config.getStringList("auto-backup.backup-times");
+        validateBackupTimes();
         autoBackupFolder = config.getString("auto-backup.backup-folder", "backups");
         autoBackupKeepLast = config.getInt("auto-backup.keep-last", 14);
         autoBackupFiles = config.getStringList("auto-backup.files-to-backup");
@@ -101,5 +111,51 @@ public class ConfigManager {
         rareOreAnnouncementsEnabled = config.getBoolean("rare-ore-announcements.enabled", true);
         diamondMessage = config.getString("rare-ore-announcements.diamond-message", "&f%player_name% &7has found &b%count% Diamonds&7!");
         ancientDebrisMessage = config.getString("rare-ore-announcements.ancient-debris-message", "&f%player_name% &7has found &c%count% Ancient Debris&7!");
+        
+        validateKeepLastBackups();
+    }
+    
+    private void validateTimezone() {
+        try {
+            ZoneId.of(timezone);
+        } catch (ZoneRulesException e) {
+            Logger.warn("Invalid timezone '" + timezone + "' in config.yml. Using default 'Europe/Stockholm'.");
+            timezone = "Europe/Stockholm";
+        }
+    }
+    
+    private void validateTime(String time, String configPath) {
+        try {
+            LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm"));
+        } catch (DateTimeParseException e) {
+            Logger.warn("Invalid time format '" + time + "' for " + configPath + ". Should be HH:mm format (e.g., '04:00').");
+        }
+    }
+    
+    private void validateWarningMinutes() {
+        if (autoRestartWarningMinutes.isEmpty()) {
+            Logger.warn("No restart warning minutes configured. Players will receive no restart warnings.");
+        }
+        for (Integer minutes : autoRestartWarningMinutes) {
+            if (minutes <= 0) {
+                Logger.warn("Invalid warning minute value: " + minutes + ". Warning minutes must be positive.");
+            }
+        }
+    }
+    
+    private void validateBackupTimes() {
+        if (autoBackupEnabled && autoBackupTimes.isEmpty()) {
+            Logger.warn("Auto-backup is enabled but no backup times are configured.");
+        }
+        for (String time : autoBackupTimes) {
+            validateTime(time, "auto-backup.backup-times");
+        }
+    }
+    
+    private void validateKeepLastBackups() {
+        if (autoBackupKeepLast <= 0) {
+            Logger.warn("Invalid keep-last backup value: " + autoBackupKeepLast + ". Must be positive. Using default of 14.");
+            autoBackupKeepLast = 14;
+        }
     }
 }
