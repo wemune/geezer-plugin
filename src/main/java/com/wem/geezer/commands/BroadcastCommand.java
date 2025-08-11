@@ -1,19 +1,20 @@
 package com.wem.geezer.commands;
 
 import com.wem.geezer.Geezer;
+import com.wem.geezer.commands.api.BaseCommand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-public class BroadcastCommand implements CommandExecutor {
+public class BroadcastCommand extends BaseCommand {
 
     private final Geezer plugin;
 
     public BroadcastCommand(Geezer plugin) {
+        super("broadcast");
         this.plugin = plugin;
     }
 

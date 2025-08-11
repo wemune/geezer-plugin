@@ -1,25 +1,27 @@
 package com.wem.geezer.commands;
 
 import com.wem.geezer.Geezer;
+import com.wem.geezer.commands.api.BaseCommand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.TimeUnit;
 
-public class UptimeCommand implements CommandExecutor {
+public class UptimeCommand extends BaseCommand {
 
     private final Geezer plugin;
 
     public UptimeCommand(Geezer plugin) {
+        super("uptime");
         this.plugin = plugin;
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         long uptimeMillis = ManagementFactory.getRuntimeMXBean().getUptime();
         Component message = LegacyComponentSerializer.legacySection().deserialize("§7Server uptime: §f" + formatTime(uptimeMillis));
         plugin.sendMessage(sender, message);

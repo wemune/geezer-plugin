@@ -1,25 +1,27 @@
 package com.wem.geezer.commands;
 
 import com.wem.geezer.Geezer;
+import com.wem.geezer.commands.api.BaseCommand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.World;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
-public class TimeCommand implements CommandExecutor {
+public class TimeCommand extends BaseCommand {
 
     private final Geezer plugin;
 
     public TimeCommand(Geezer plugin) {
+        super("time");
         this.plugin = plugin;
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player)) {
             plugin.sendMessage(sender, Component.text("This command can only be run by a player.", NamedTextColor.RED));
             return true;
@@ -40,10 +42,10 @@ public class TimeCommand implements CommandExecutor {
 
         String event;
         long ticksUntilEvent;
-        if (ticks >= 0 && ticks < 12000) { // Day time
+        if (ticks >= 0 && ticks < 12000) { 
             event = "Sunset";
             ticksUntilEvent = 12000 - ticks;
-        } else { // Night time
+        } else { 
             event = "Sunrise";
             ticksUntilEvent = (24000 - ticks);
         }

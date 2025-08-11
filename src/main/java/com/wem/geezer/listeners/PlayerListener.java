@@ -3,6 +3,7 @@ package com.wem.geezer.listeners;
 import com.wem.geezer.Geezer;
 import com.wem.geezer.database.PlayerStats;
 import com.wem.geezer.database.StatsManager;
+import com.wem.geezer.management.ConfigManager;
 import com.wem.geezer.management.PlayerListManager;
 import com.wem.geezer.util.Logger;
 import net.kyori.adventure.text.Component;
@@ -40,6 +41,7 @@ public class PlayerListener implements Listener {
     private final StatsManager statsManager;
     private final Map<UUID, Long> joinTimes;
     private final PlayerListManager playerListManager;
+    private final ConfigManager configManager;
     private final Map<Material, Consumer<PlayerStats>> blockBreakHandlers = new EnumMap<>(Material.class);
     private final Set<Location> processedVeins = new HashSet<>();
 
@@ -48,6 +50,7 @@ public class PlayerListener implements Listener {
         this.statsManager = plugin.getStatsManager();
         this.joinTimes = plugin.getJoinTimes();
         this.playerListManager = playerListManager;
+        this.configManager = plugin.getConfigManager();
         initializeBlockBreakHandlers();
     }
 
@@ -81,10 +84,10 @@ public class PlayerListener implements Listener {
             }
         });
 
-        if (plugin.getConfig().getBoolean("join-and-quit-messages.enabled", true)) {
+        if (configManager.isJoinQuitMessagesEnabled()) {
             event.joinMessage(null);
 
-            String joinMessageFormat = plugin.getConfig().getString("join-and-quit-messages.join", "&f%player_name% &7has &ajoined&7.");
+            String joinMessageFormat = configManager.getJoinMessage();
             String formattedMessage = joinMessageFormat.replace("%player_name%", player.getName());
             Component component = LegacyComponentSerializer.legacyAmpersand().deserialize(formattedMessage);
 
@@ -98,13 +101,15 @@ public class PlayerListener implements Listener {
 
     private void sendMotd(Player player, Date lastSeen) {
         boolean isFirstJoin = (lastSeen == null);
-        String motdPath = isFirstJoin ? "first-join-motd" : "motd";
-
-        if (!plugin.getConfig().getBoolean(motdPath + ".enabled", true)) {
-            return;
+        
+        List<String> lines;
+        if (isFirstJoin) {
+            if (!configManager.isFirstJoinMotdEnabled()) return;
+            lines = configManager.getFirstJoinMotdLines();
+        } else {
+            if (!configManager.isMotdEnabled()) return;
+            lines = configManager.getMotdLines();
         }
-
-        List<String> lines = plugin.getConfig().getStringList(motdPath + ".lines");
 
         if (lines.isEmpty()) {
             if (isFirstJoin) {
@@ -208,8 +213,8 @@ public class PlayerListener implements Listener {
 
         statsManager.unloadPlayerStats(playerUUID);
 
-        if (plugin.getConfig().getBoolean("join-and-quit-messages.enabled", true)) {
-            String quitMessageFormat = plugin.getConfig().getString("join-and-quit-messages.quit", "&f%player_name% &7has &cleft&7.");
+        if (configManager.isJoinQuitMessagesEnabled()) {
+            String quitMessageFormat = configManager.getQuitMessage();
             String formattedMessage = quitMessageFormat.replace("%player_name%", player.getName());
             Component component = Geezer.PREFIX.append(LegacyComponentSerializer.legacyAmpersand().deserialize(formattedMessage));
             event.quitMessage(component);
@@ -231,7 +236,7 @@ public class PlayerListener implements Listener {
             Logger.info(player.getName() + " mined " + blockType.toString().replace("_", " "));
         }
 
-        if (plugin.getConfig().getBoolean("rare-ore-announcements.enabled", true)) {
+        if (configManager.isRareOreAnnouncementsEnabled()) {
             boolean isRareOre = (blockType == Material.DIAMOND_ORE || blockType == Material.DEEPSLATE_DIAMOND_ORE || blockType == Material.ANCIENT_DEBRIS);
 
             if (isRareOre && !processedVeins.contains(block.getLocation())) {
@@ -241,12 +246,12 @@ public class PlayerListener implements Listener {
 
                 String messageFormat = null;
                 if (blockType == Material.DIAMOND_ORE || blockType == Material.DEEPSLATE_DIAMOND_ORE) {
-                    messageFormat = plugin.getConfig().getString("rare-ore-announcements.diamond-message", "&f%player_name% &7has found &b%count% Diamonds&7!");
+                    messageFormat = configManager.getDiamondMessage();
                     if (veinSize == 1) {
                         messageFormat = messageFormat.replace("Diamonds", "Diamond");
                     }
                 } else if (blockType == Material.ANCIENT_DEBRIS) {
-                    messageFormat = plugin.getConfig().getString("rare-ore-announcements.ancient-debris-message", "&f%player_name% &7has found &c%count% Ancient Debris&7!");
+                    messageFormat = configManager.getAncientDebrisMessage();
                 }
 
                 if (messageFormat != null) {
@@ -310,7 +315,7 @@ public class PlayerListener implements Listener {
             Logger.info(player.getName() + " has died.");
         }
 
-        if (plugin.getConfig().getBoolean("death-messages.enabled", true)) {
+        if (configManager.isDeathMessagesEnabled()) {
             Component originalDeathMessageComp = event.deathMessage();
             if (originalDeathMessageComp == null) return;
 

@@ -1,21 +1,22 @@
 package com.wem.geezer.commands;
 
 import com.wem.geezer.Geezer;
+import com.wem.geezer.commands.api.BaseCommand;
 import com.wem.geezer.management.RestartManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-public class ToggleRestartCommand implements CommandExecutor {
+public class ToggleRestartCommand extends BaseCommand {
 
     private final Geezer plugin;
     private final RestartManager restartManager;
 
     public ToggleRestartCommand(Geezer plugin) {
+        super("togglerestart");
         this.plugin = plugin;
         this.restartManager = plugin.getRestartManager();
     }

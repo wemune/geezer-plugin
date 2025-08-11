@@ -1,28 +1,30 @@
 package com.wem.geezer.commands;
 
 import com.wem.geezer.Geezer;
+import com.wem.geezer.commands.api.BaseCommand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.TimeUnit;
 
-public class SeenCommand implements CommandExecutor {
+public class SeenCommand extends BaseCommand {
 
     private final Geezer plugin;
 
     public SeenCommand(Geezer plugin) {
+        super("seen");
         this.plugin = plugin;
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length == 0) {
             plugin.sendMessage(sender, Component.text("Please specify a player's name.", NamedTextColor.RED));
             return true;

@@ -1,6 +1,7 @@
 package com.wem.geezer.commands;
 
 import com.wem.geezer.Geezer;
+import com.wem.geezer.commands.api.BaseCommand;
 import com.wem.geezer.database.PlayerStats;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -9,23 +10,24 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Statistic;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 
-public class StatsCommand implements CommandExecutor {
+public class StatsCommand extends BaseCommand {
 
     private final Geezer plugin;
     private static final DecimalFormat df = new DecimalFormat("0.00");
 
     public StatsCommand(Geezer plugin) {
+        super("stats");
         this.plugin = plugin;
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length == 0) {
             if (!(sender instanceof Player)) {
                 plugin.sendMessage(sender, Component.text("Please specify a player's name.", NamedTextColor.RED));

@@ -1,6 +1,7 @@
 package com.wem.geezer.commands;
 
 import com.wem.geezer.Geezer;
+import com.wem.geezer.commands.api.BaseCommand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -8,26 +9,27 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.UUID;
 
-public class CoordsCommand implements CommandExecutor {
+public class CoordsCommand extends BaseCommand {
 
     private final Geezer plugin;
     private final Map<UUID, Long> cooldowns;
     private static final long COOLDOWN_SECONDS = 30;
 
     public CoordsCommand(Geezer plugin) {
+        super("coords");
         this.plugin = plugin;
         this.cooldowns = plugin.getCoordsCooldowns();
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player)) {
             plugin.sendMessage(sender, Component.text("This command can only be run by a player.", NamedTextColor.RED));
             return true;

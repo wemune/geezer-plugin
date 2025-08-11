@@ -7,7 +7,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,10 +28,12 @@ import java.util.zip.ZipOutputStream;
 public class BackupManager {
 
     private final Geezer plugin;
+    private final ConfigManager configManager;
     private final AtomicBoolean isBackupRunning = new AtomicBoolean(false);
 
     public BackupManager(Geezer plugin) {
         this.plugin = plugin;
+        this.configManager = plugin.getConfigManager();
     }
 
     public boolean startManualBackup() {
@@ -44,13 +45,12 @@ public class BackupManager {
     }
 
     public void scheduleBackup() {
-        FileConfiguration config = plugin.getConfig();
-        if (!config.getBoolean("auto-backup.enabled", false)) {
+        if (!configManager.isAutoBackupEnabled()) {
             Logger.info("Auto-backup is disabled in the config.");
             return;
         }
 
-        List<String> backupTimes = config.getStringList("auto-backup.backup-times");
+        List<String> backupTimes = configManager.getAutoBackupTimes();
         if (backupTimes.isEmpty()) {
             Logger.warn("No backup times specified in config.yml. Using default times: 08:00 and 20:00.");
             backupTimes = Arrays.asList("08:00", "20:00");
@@ -93,7 +93,6 @@ public class BackupManager {
             return;
         }
 
-        FileConfiguration config = plugin.getConfig();
         plugin.broadcast(Component.text("Starting server backup...", NamedTextColor.RED, TextDecoration.BOLD));
 
         Bukkit.getScheduler().runTask(plugin, () -> {
@@ -106,7 +105,7 @@ public class BackupManager {
         try {
             Thread.sleep(5000);
 
-            String backupFolderName = config.getString("auto-backup.backup-folder", "backups");
+            String backupFolderName = configManager.getAutoBackupFolder();
             File backupFolder = new File(plugin.getServer().getWorldContainer(), backupFolderName);
             if (!backupFolder.exists()) {
                 backupFolder.mkdirs();
@@ -116,7 +115,7 @@ public class BackupManager {
             String zipFileName = "backup-" + timestamp + ".zip";
             File zipFile = new File(backupFolder, zipFileName);
 
-            List<String> filesToBackup = config.getStringList("auto-backup.files-to-backup");
+            List<String> filesToBackup = configManager.getAutoBackupFiles();
             if (filesToBackup.isEmpty()) {
                 filesToBackup = Arrays.asList("world", "world_nether", "world_the_end");
             }
@@ -172,7 +171,7 @@ public class BackupManager {
     }
 
     private void cleanupOldBackups(File backupFolder) {
-        int keepLast = plugin.getConfig().getInt("auto-backup.keep-last", 14);
+        int keepLast = configManager.getAutoBackupKeepLast();
         if (keepLast <= 0) return;
 
         File[] backupFiles = backupFolder.listFiles((dir, name) -> name.endsWith(".zip"));

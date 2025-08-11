@@ -17,6 +17,10 @@ dependencies {
     // Paper API for plugin development
     compileOnly 'io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT'
 
+    // Lombok for boilerplate code reduction
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
     // ORMlite for database object mapping
     implementation 'com.j256.ormlite:ormlite-core:6.1'
     implementation 'com.j256.ormlite:ormlite-jdbc:6.1'
@@ -29,6 +33,9 @@ dependencies {
     
     // SLF4J API - HikariCP and ORMLite use this for logging. Paper provides the implementation.
     compileOnly 'org.slf4j:slf4j-api:2.0.12'
+
+    // Reflections for dynamic command loading
+    implementation 'org.reflections:reflections:0.10.2'
 }
 
 java {

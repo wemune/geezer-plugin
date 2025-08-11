@@ -12,17 +12,19 @@ import java.util.concurrent.TimeUnit;
 public class PlayerListManager {
 
     private final Geezer plugin;
+    private final ConfigManager configManager;
     private String header;
     private String footer;
 
     public PlayerListManager(Geezer plugin) {
         this.plugin = plugin;
+        this.configManager = plugin.getConfigManager();
         loadConfig();
     }
 
     public void loadConfig() {
-        this.header = plugin.getConfig().getString("player-list.header", "&b&lGeezer World\n&7Welcome, &f%player_name%&7!");
-        this.footer = plugin.getConfig().getString("player-list.footer", "\n&7Players Online: &f%online%/%max_players%\n&7Uptime: &f%uptime% &8| &7Ping: &f%ping%ms");
+        this.header = configManager.getPlayerListHeader();
+        this.footer = configManager.getPlayerListFooter();
     }
 
     public void start() {

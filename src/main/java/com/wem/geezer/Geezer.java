@@ -1,6 +1,5 @@
 package com.wem.geezer;
 
-import com.wem.geezer.commands.*;
 import com.wem.geezer.database.DatabaseManager;
 import com.wem.geezer.database.PlayerStats;
 import com.wem.geezer.database.StatsManager;
@@ -32,7 +31,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 public final class Geezer extends JavaPlugin {
@@ -47,12 +49,27 @@ public final class Geezer extends JavaPlugin {
     private BackupManager backupManager;
     private ContainerManager containerManager;
     private ZoneId zoneId;
+    private ConfigManager configManager;
 
     private final Queue<Component> announcementQueue = new ConcurrentLinkedQueue<>();
     private final AtomicBoolean isAnnouncementRunning = new AtomicBoolean(false);
     private BukkitTask announcerTask;
 
-    private final ExecutorService dbExecutor = Executors.newFixedThreadPool(Math.max(2, Runtime.getRuntime().availableProcessors() / 2));
+    private final AtomicInteger dbThreadCount = new AtomicInteger(1);
+    private final ExecutorService dbExecutor = Executors.newFixedThreadPool(
+            Math.max(2, Runtime.getRuntime().availableProcessors() / 2),
+            new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread t = new Thread(r, "geezer-db-" + dbThreadCount.getAndIncrement());
+                    t.setDaemon(true);
+                    t.setUncaughtExceptionHandler((thread, ex) -> {
+                        java.util.logging.Logger.getLogger("Geezer").log(Level.SEVERE, "Uncaught DB executor exception", ex);
+                    });
+                    return t;
+                }
+            }
+    );
 
     private final Map<UUID, Long> joinTimes = new ConcurrentHashMap<>();
     private final Map<UUID, UUID> lastMessageSender = new ConcurrentHashMap<>();
@@ -61,9 +78,10 @@ public final class Geezer extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        configManager = new ConfigManager(this);
 
         try {
-            String tz = getConfig().getString("timezone", "Europe/Stockholm");
+            String tz = configManager.getTimezone();
             this.zoneId = ZoneId.of(tz);
             Logger.info("Using timezone: " + this.zoneId);
         } catch (ZoneRulesException e) {
@@ -89,6 +107,7 @@ public final class Geezer extends JavaPlugin {
         backupManager = new BackupManager(this);
         containerManager = new ContainerManager(this);
         new DaylightManager(this);
+        new CommandManager(this).registerCommands();
 
         getServer().getPluginManager().registerEvents(new PlayerListener(this, playerListManager), this);
         getServer().getPluginManager().registerEvents(new SignListener(), this);
@@ -97,21 +116,6 @@ public final class Geezer extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new LootListener(this), this);
         getServer().getPluginManager().registerEvents(new WorldListener(), this);
         getServer().getPluginManager().registerEvents(afkManager, this);
-
-        if (getCommand("playtime") != null) getCommand("playtime").setExecutor(new PlaytimeCommand(this)); else Logger.warn("Command 'playtime' missing from plugin.yml");
-        if (getCommand("stats") != null) getCommand("stats").setExecutor(new StatsCommand(this)); else Logger.warn("Command 'stats' missing from plugin.yml");
-        if (getCommand("uptime") != null) getCommand("uptime").setExecutor(new UptimeCommand(this)); else Logger.warn("Command 'uptime' missing from plugin.yml");
-        if (getCommand("ping") != null) getCommand("ping").setExecutor(new PingCommand(this)); else Logger.warn("Command 'ping' missing from plugin.yml");
-        if (getCommand("seen") != null) getCommand("seen").setExecutor(new SeenCommand(this)); else Logger.warn("Command 'seen' missing from plugin.yml");
-        if (getCommand("coords") != null) getCommand("coords").setExecutor(new CoordsCommand(this)); else Logger.warn("Command 'coords' missing from plugin.yml");
-        if (getCommand("msg") != null) getCommand("msg").setExecutor(new MsgCommand(this)); else Logger.warn("Command 'msg' missing from plugin.yml");
-        if (getCommand("reply") != null) getCommand("reply").setExecutor(new ReplyCommand(this)); else Logger.warn("Command 'reply' missing from plugin.yml");
-        if (getCommand("time") != null) getCommand("time").setExecutor(new TimeCommand(this)); else Logger.warn("Command 'time' missing from plugin.yml");
-        if (getCommand("help") != null) getCommand("help").setExecutor(new HelpCommand(this)); else Logger.warn("Command 'help' missing from plugin.yml");
-        if (getCommand("backup") != null) getCommand("backup").setExecutor(new BackupCommand(this)); else Logger.warn("Command 'backup' missing from plugin.yml");
-        if (getCommand("togglerestart") != null) getCommand("togglerestart").setExecutor(new ToggleRestartCommand(this)); else Logger.warn("Command 'togglerestart' missing from plugin.yml");
-        if (getCommand("colors") != null) getCommand("colors").setExecutor(new ColorsCommand(this)); else Logger.warn("Command 'colors' missing from plugin.yml");
-        if (getCommand("broadcast") != null) getCommand("broadcast").setExecutor(new BroadcastCommand(this)); else Logger.warn("Command 'broadcast' missing from plugin.yml");
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> statsManager.saveAll(), 1200L, 1200L);
         restartManager.scheduleRestart();
@@ -138,14 +142,25 @@ public final class Geezer extends JavaPlugin {
             databaseManager.close();
         }
 
+        dbExecutor.shutdown();
         try {
+            if (!dbExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
+                dbExecutor.shutdownNow();
+                if (!dbExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                    getLogger().log(Level.WARNING, "DB executor did not terminate after forced shutdown");
+                }
+            }
+        } catch (InterruptedException ex) {
             dbExecutor.shutdownNow();
+            Thread.currentThread().interrupt();
+            getLogger().log(Level.WARNING, "Interrupted while shutting down DB executor", ex);
         } catch (Exception ex) {
             getLogger().log(Level.WARNING, "Error shutting down DB executor", ex);
         }
 
         Logger.info("Geezer plugin has been disabled.");
     }
+
 
     public void sendMessage(CommandSender sender, Component message) {
         sender.sendMessage(PREFIX.append(message));
@@ -197,6 +212,10 @@ public final class Geezer extends JavaPlugin {
 
      public ContainerManager getContainerManager() {
          return containerManager;
+     }
+
+     public ConfigManager getConfigManager() {
+        return configManager;
      }
 
      public ZoneId getZoneId() {

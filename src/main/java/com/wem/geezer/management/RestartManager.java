@@ -6,7 +6,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.time.Duration;
@@ -20,25 +19,26 @@ import java.util.List;
 public class RestartManager {
 
     private final Geezer plugin;
+    private final ConfigManager configManager;
     private final List<BukkitTask> scheduledTasks = new ArrayList<>();
     private boolean isRestartScheduled = false;
     private ZonedDateTime nextRestartTime = null;
 
     public RestartManager(Geezer plugin) {
         this.plugin = plugin;
+        this.configManager = plugin.getConfigManager();
     }
 
     public void scheduleRestart() {
         cancelRestart();
 
-        FileConfiguration config = plugin.getConfig();
-        if (!config.getBoolean("auto-restart.enabled", true)) {
+        if (!configManager.isAutoRestartEnabled()) {
             Logger.info("Auto-restart is disabled in the config.");
             isRestartScheduled = false;
             return;
         }
 
-        String restartTimeString = config.getString("auto-restart.restart-time", "04:00");
+        String restartTimeString = configManager.getAutoRestartTime();
         ZoneId zoneId = plugin.getZoneId();
 
         LocalTime restartTime;
@@ -64,7 +64,7 @@ public class RestartManager {
         }, totalSecondsUntilRestart * 20L);
         scheduledTasks.add(mainTask);
 
-        List<Integer> warningMinutes = config.getIntegerList("auto-restart.warning-minutes");
+        List<Integer> warningMinutes = configManager.getAutoRestartWarningMinutes();
         if (warningMinutes.isEmpty()) {
             warningMinutes = Arrays.asList(60, 30, 15, 5, 1);
         }
