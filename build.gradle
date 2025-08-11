@@ -47,7 +47,6 @@ shadowJar {
     // Relocate dependencies to avoid conflicts with other plugins
     relocate 'com.j256.ormlite', 'com.wem.geezer.libs.ormlite'
     relocate 'com.zaxxer.hikari', 'com.wem.geezer.libs.hikaricp'
-    relocate 'org.sqlite', 'com.wem.geezer.libs.sqlite'
     
     // Do not include the Paper API in the final jar
     dependencies {
