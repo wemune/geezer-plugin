@@ -59,6 +59,9 @@ commands:
     permission: geezer.broadcast
     permission-message: "You do not have permission to use this command."
     aliases: [bc]
+  pearls:
+    description: "Toggles the ability to pick up ender pearls."
+    usage: "/pearls"
 permissions:
   geezer.admin:
     description: "Grants access to all Geezer admin commands."

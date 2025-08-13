@@ -7,6 +7,7 @@ import com.wem.geezer.listeners.AnvilListener;
 import com.wem.geezer.listeners.CommandListener;
 import com.wem.geezer.listeners.LootListener;
 import com.wem.geezer.listeners.PlayerListener;
+import com.wem.geezer.listeners.PearlListener;
 import com.wem.geezer.listeners.SignListener;
 import com.wem.geezer.listeners.WorldListener;
 import com.wem.geezer.management.*;
@@ -54,6 +55,7 @@ public final class Geezer extends JavaPlugin {
     private AFKManager afkManager;
     private BackupManager backupManager;
     private ContainerManager containerManager;
+    private PearlManager pearlManager;
     private ZoneId zoneId;
     private ConfigManager configManager;
 
@@ -112,6 +114,7 @@ public final class Geezer extends JavaPlugin {
         afkManager = new AFKManager(this);
         backupManager = new BackupManager(this);
         containerManager = new ContainerManager(this);
+        pearlManager = new PearlManager(this);
         new DaylightManager(this);
         new CommandManager(this).registerCommands();
 
@@ -121,6 +124,7 @@ public final class Geezer extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new CommandListener(this), this);
         getServer().getPluginManager().registerEvents(new LootListener(this), this);
         getServer().getPluginManager().registerEvents(new WorldListener(), this);
+        getServer().getPluginManager().registerEvents(new PearlListener(this), this);
         getServer().getPluginManager().registerEvents(afkManager, this);
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> statsManager.saveAll(), STATS_SAVE_INTERVAL_TICKS, STATS_SAVE_INTERVAL_TICKS);
@@ -128,6 +132,7 @@ public final class Geezer extends JavaPlugin {
         playerListManager.start();
         afkManager.start();
         backupManager.scheduleBackup();
+        pearlManager.load();
 
         Logger.info("Geezer plugin has been enabled!");
     }
@@ -218,6 +223,10 @@ public final class Geezer extends JavaPlugin {
 
      public ContainerManager getContainerManager() {
          return containerManager;
+     }
+
+     public PearlManager getPearlManager() {
+         return pearlManager;
      }
 
      public ConfigManager getConfigManager() {
