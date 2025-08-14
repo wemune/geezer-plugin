@@ -41,8 +41,6 @@ public class PlayerStats {
     @DatabaseField(defaultValue = "0")
     private long coalOreMined;
 
-    @DatabaseField(defaultValue = "false")
-    private boolean pearlsDisabled;
 
 
     public PlayerStats() {
@@ -66,9 +64,6 @@ public class PlayerStats {
     public long getRedstoneOreMined() { return redstoneOreMined; }
     public long getCoalOreMined() { return coalOreMined; }
 
-    public boolean isPearlsDisabled() { return pearlsDisabled; }
-
-    public void setPearlsDisabled(boolean pearlsDisabled) { this.pearlsDisabled = pearlsDisabled; }
 
     public void setLastSeen(Date lastSeen) { this.lastSeen = lastSeen; }
     public void incrementPlayTime(long seconds) { this.playTimeSeconds += seconds; }

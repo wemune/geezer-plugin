@@ -20,12 +20,15 @@ public class StatsManager {
     }
 
     public void loadPlayerStats(Player player, Consumer<PlayerStats> callback) {
+        Logger.info("Attempting to load stats for player: " + player.getName() + " (" + player.getUniqueId() + ")");
         plugin.getOfflinePlayerStats(player.getUniqueId()).thenAccept(loadedStats -> {
             final PlayerStats finalStats;
             if (loadedStats == null) {
                 finalStats = new PlayerStats(player.getUniqueId());
+                Logger.info("No existing stats found for " + player.getName() + ". Creating new PlayerStats object.");
             } else {
                 finalStats = loadedStats;
+                Logger.info("Loaded existing stats for " + player.getName() + ".");
             }
             statsCache.put(player.getUniqueId(), finalStats);
 
@@ -38,6 +41,7 @@ public class StatsManager {
     public void unloadPlayerStats(UUID playerUUID) {
         PlayerStats stats = statsCache.remove(playerUUID);
         if (stats != null) {
+            Logger.info("Unloading and saving stats for player: " + playerUUID);
             saveStatsToDatabase(stats);
         }
     }
@@ -46,10 +50,17 @@ public class StatsManager {
         return statsCache.get(playerUUID);
     }
 
+    public void cacheStats(PlayerStats stats) {
+        statsCache.put(stats.getPlayerUUID(), stats);
+        Logger.info("Added PlayerStats to cache for player: " + stats.getPlayerUUID());
+    }
+
     public void saveStatsToDatabase(PlayerStats stats) {
+        Logger.info("Saving stats to database for player: " + stats.getPlayerUUID());
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 plugin.getDatabaseManager().getPlayerStatsDao().createOrUpdate(stats);
+                Logger.info("Successfully saved stats for player: " + stats.getPlayerUUID());
             } catch (SQLException e) {
                 Logger.severe("Failed to save stats for " + stats.getPlayerUUID() + ": " + e.getMessage());
             }

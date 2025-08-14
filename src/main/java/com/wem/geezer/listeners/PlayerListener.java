@@ -48,7 +48,7 @@ public class PlayerListener implements Listener {
     public PlayerListener(Geezer plugin, PlayerListManager playerListManager) {
         this.plugin = plugin;
         this.statsManager = plugin.getStatsManager();
-        this.joinTimes = plugin.getJoinTimes();
+        this.joinTimes = plugin.getJoinTimesInternal();
         this.playerListManager = playerListManager;
         this.configManager = plugin.getConfigManager();
         initializeBlockBreakHandlers();
@@ -225,7 +225,10 @@ public class PlayerListener implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
         PlayerStats stats = statsManager.getStats(player.getUniqueId());
-        if (stats == null) return;
+        if (stats == null) {
+            Logger.warn("PlayerStats is null for " + player.getName() + ". Ore announcement skipped.");
+            return;
+        }
 
         Block block = event.getBlock();
         Material blockType = block.getType();

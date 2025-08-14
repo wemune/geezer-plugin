@@ -79,19 +79,6 @@ public class DatabaseManager {
             }
         }
 
-        try {
-            playerStatsDao.queryBuilder().selectColumns("pearlsDisabled").limit(1L).query();
-        } catch (SQLException e) {
-            if (e.getMessage().contains("no such column: pearlsDisabled")) {
-                try {
-                    Logger.info("Performing database schema upgrade: Adding 'pearlsDisabled' column to player_stats.");
-                    playerStatsDao.executeRaw("ALTER TABLE player_stats ADD COLUMN pearlsDisabled BOOLEAN DEFAULT FALSE;");
-                    Logger.info("Database schema upgrade successful for player_stats.");
-                } catch (SQLException ex) {
-                    Logger.severe("Critical error during database schema upgrade for player_stats: " + ex.getMessage());
-                }
-            }
-        }
     }
 
     public void close() {

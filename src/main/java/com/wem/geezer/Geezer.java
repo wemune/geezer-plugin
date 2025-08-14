@@ -114,7 +114,7 @@ public final class Geezer extends JavaPlugin {
         afkManager = new AFKManager(this);
         backupManager = new BackupManager(this);
         containerManager = new ContainerManager(this);
-        pearlManager = new PearlManager(this);
+        pearlManager = new PearlManager();
         new DaylightManager(this);
         new CommandManager(this).registerCommands();
 
@@ -239,6 +239,10 @@ public final class Geezer extends JavaPlugin {
 
      public Map<UUID, Long> getJoinTimes() {
          return Collections.unmodifiableMap(joinTimes);
+     }
+
+     public Map<UUID, Long> getJoinTimesInternal() {
+         return joinTimes;
      }
 
      public Map<UUID, UUID> getLastMessageSender() {
