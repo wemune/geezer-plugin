@@ -56,11 +56,9 @@ public class StatsManager {
     }
 
     public void saveStatsToDatabase(PlayerStats stats) {
-        Logger.info("Saving stats to database for player: " + stats.getPlayerUUID());
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 plugin.getDatabaseManager().getPlayerStatsDao().createOrUpdate(stats);
-                Logger.info("Successfully saved stats for player: " + stats.getPlayerUUID());
             } catch (SQLException e) {
                 Logger.severe("Failed to save stats for " + stats.getPlayerUUID() + ": " + e.getMessage());
             }
